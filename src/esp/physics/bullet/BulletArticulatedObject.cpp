@@ -193,6 +193,7 @@ void BulletArticulatedObject::initializeFromURDF(
     }
     // set user config attributes from model.
     setUserAttributes(urdfModel->getUserConfiguration());
+    initializationAttributes_ = urdfModel->getInitializationAttributes();
 
     // in case the base transform is not zero by default
     syncPose();
@@ -267,7 +268,7 @@ BulletArticulatedObject::getCurrentStateInstanceAttr() {
   auto sceneArtObjInstanceAttr =
       ArticulatedObject::getCurrentStateInstanceAttr();
   if (!sceneArtObjInstanceAttr) {
-    // if no scene instance attributes specified, no initial state is set
+    // if no Scene Instance Attributes specified, no initial state is set
     return nullptr;
   }
   sceneArtObjInstanceAttr->setAutoClampJointLimits(autoClampJointLimits_);
@@ -291,7 +292,7 @@ BulletArticulatedObject::getCurrentStateInstanceAttr() {
 void BulletArticulatedObject::resetStateFromSceneInstanceAttr() {
   auto sceneObjInstanceAttr = getInitObjectInstanceAttr();
   if (!sceneObjInstanceAttr) {
-    // if no scene instance attributes specified, no initial state is set
+    // if no Scene Instance Attributes specified, no initial state is set
     return;
   }
   // Set whether dofs should be clamped to limits before phys step

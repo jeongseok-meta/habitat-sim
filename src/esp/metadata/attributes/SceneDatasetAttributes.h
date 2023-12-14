@@ -91,6 +91,24 @@ class SceneDatasetAttributes : public AbstractAttributes {
   }
 
   /**
+   * @brief Retrieve the shader type to use for the various default materials,
+   * either Phong of PBR
+   */
+  ObjectInstanceShaderType getDefaultMaterialShaderType() const {
+    return get<bool>("default_material_is_pbr")
+               ? ObjectInstanceShaderType::PBR
+               : ObjectInstanceShaderType::Phong;
+  }
+
+  /**
+   * @brief Set whether to use PBR or Phong for the default material values
+   * defined in resource Manager.
+   */
+  void setDefaultMaterialIsPBR(bool default_material_is_pbr) {
+    set("default_material_is_pbr", default_material_is_pbr);
+  }
+
+  /**
    * @brief Return the map for navmesh file locations
    */
   const std::map<std::string, std::string>& getNavmeshMap() const {
@@ -121,13 +139,13 @@ class SceneDatasetAttributes : public AbstractAttributes {
   }
 
   /**
-   * @brief Add an entry to the navmeshMap with the passed key.  If @p overwrite
+   * @brief Add an entry to the @ref navmeshMap_ with the passed key.  If @p overwrite
    * then overwrite existing entry, otherwise will modify key and add value with
-   * modified key.  Returns pair of added KV.
+   * modified key.  Returns pair of added Key-Value.
    * @param key The handle for the navmesh path to add
    * @param path The path to the navmesh asset to add
    * @param overwrite Whether to overwrite existing entries or not
-   * @return K-V pair for path being added.
+   * @return Key-Value pair for path being added.
    */
   std::pair<std::string, std::string> addNavmeshPathEntry(
       const std::string& key,
@@ -137,13 +155,13 @@ class SceneDatasetAttributes : public AbstractAttributes {
   }  // addNavmeshPathEntry
 
   /**
-   * @brief Add an entry to the SemanticSceneDescr map with the passed key. If
+   * @brief Add an entry to the @ref semanticSceneDescrMap_ map with the passed key. If
    * @p overwrite then overwrite existing entry,  otherwise will modify key and
-   * add value with modified key.  Returns pair of added KV.
+   * add value with modified key.  Returns pair of added Key-Value.
    * @param key The handle for the SemanticSceneDescr path to add
    * @param path The path to the SemanticSceneDescr asset to add
    * @param overwrite Whether to overwrite existing entries or not
-   * @return K-V pair for SemanticSceneDescr being added.
+   * @return Key-Value pair for SemanticSceneDescr being added.
    */
   std::pair<std::string, std::string> addSemanticSceneDescrPathEntry(
       const std::string& key,
@@ -227,7 +245,7 @@ class SceneDatasetAttributes : public AbstractAttributes {
    * so adding them.  This is to handle the addition of an existing
    * sceneInstance that might reference stages, objects, navmeshes, etc. that
    * do not exist in the dataset.
-   * @param sceneInstance A Scene Instance Attributes.  It is assumed the @p
+   * @param sceneInstance A pointer to a @ref metadata::attributes::SceneInstanceAttributes.  It is assumed the @p
    * sceneInstance at least references a valid stage.
    * @return whether this sceneInstance was successfully added to the dataset.
    */
@@ -261,6 +279,20 @@ class SceneDatasetAttributes : public AbstractAttributes {
       const std::string& objAttrName);
 
   /**
+   * @brief Returns articulated object attributes corresponding to passed handle
+   * as substring. Assumes articulated object attributes with @p artObjAttrName
+   * as substring exists in current dataset.
+   * @param artObjAttrName substring to handle of articulated object instance
+   * attributes that exists in current active dataset. The attributes will be
+   * found via substring search, so the name is expected to be sufficiently
+   * restrictive to have exactly 1 match in dataset.
+   * @return smart pointer to articulated object attributes if exists, nullptr
+   * otherwise.
+   */
+  attributes::ArticulatedObjectAttributes::ptr
+  getNamedArticulatedObjectAttributesCopy(const std::string& artObjAttrName);
+
+  /**
    * @brief Returns a lightsetup object configured by the attributes whose
    * handle contains the passed @p lightSetupName
    * @param lightSetupName Name of the attributes to be used to build the
@@ -283,7 +315,7 @@ class SceneDatasetAttributes : public AbstractAttributes {
    * or empty string if none.
    */
   inline std::string getStageAttrFullHandle(const std::string& stageAttrName) {
-    return getFullAttrNameFromStr(stageAttrName, stageAttributesManager_);
+    return stageAttributesManager_->getFullAttrNameFromStr(stageAttrName);
   }  // getStageAttrFullHandle
 
   /**
@@ -298,7 +330,7 @@ class SceneDatasetAttributes : public AbstractAttributes {
    * empty string if none.
    */
   inline std::string getObjAttrFullHandle(const std::string& objAttrName) {
-    return getFullAttrNameFromStr(objAttrName, objectAttributesManager_);
+    return objectAttributesManager_->getFullAttrNameFromStr(objAttrName);
   }  // getObjAttrFullHandle
 
   /**
@@ -314,7 +346,7 @@ class SceneDatasetAttributes : public AbstractAttributes {
    */
   inline std::string getArticulatedObjModelFullHandle(
       const std::string& artObjModelName) {
-    return getFullAttrNameFromStr(artObjModelName, artObjAttributesManager_);
+    return artObjAttributesManager_->getFullAttrNameFromStr(artObjModelName);
     // std::map<std::string, std::string> articulatedObjPaths;
   }
 
@@ -344,8 +376,8 @@ class SceneDatasetAttributes : public AbstractAttributes {
         (lightSetupName == NO_LIGHT_KEY)) {
       return lightSetupName;
     }
-    return getFullAttrNameFromStr(lightSetupName,
-                                  lightLayoutAttributesManager_);
+    return lightLayoutAttributesManager_->getFullAttrNameFromStr(
+        lightSetupName);
   }  // getLightSetupFullHandle
 
   /**
@@ -372,25 +404,6 @@ class SceneDatasetAttributes : public AbstractAttributes {
    * of this managed object.
    */
   std::string getObjectInfoInternal() const override;
-
-  /**
-   * @brief Returns actual attributes handle containing @p attrName as a
-   * substring, or the empty string if none exists, from passed @p attrMgr .
-   * Does a substring search, and returns first value found.
-   * @param attrName name to be used as searching substring in @p attrMgr .
-   * @param attrMgr attributes manager to be searched
-   * @return actual name of attributes in attrMgr, or empty string if does not
-   * exist.
-   */
-  inline std::string getFullAttrNameFromStr(
-      const std::string& attrName,
-      const ManagedContainerBase::ptr& attrMgr) {
-    auto handleList = attrMgr->getObjectHandlesBySubstring(attrName);
-    if (!handleList.empty()) {
-      return handleList[0];
-    }
-    return "";
-  }  // getFullAttrNameFromStr
 
   /**
    * @brief This will add a navmesh entry or a semantic scene descriptor entry
@@ -442,7 +455,7 @@ class SceneDatasetAttributes : public AbstractAttributes {
   managers::AOAttributesManager::ptr artObjAttributesManager_ = nullptr;
 
   /**
-   * @brief Manages all construction and access to scene instance attributes
+   * @brief Manages all construction and access to @ref metadata::attributes::SceneInstanceAttributes
    * from this dataset.
    */
   managers::SceneInstanceAttributesManager::ptr

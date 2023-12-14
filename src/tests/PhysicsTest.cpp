@@ -86,7 +86,7 @@ struct PhysicsTest : Cr::TestSuite::Tester {
       stageAttributesMgr->setCurrPhysicsManagerAttributesHandle(
           physicsManagerAttributes->getHandle());
     }
-    // create scene instance attributes
+    // create Scene Instance Attributes
     esp::metadata::attributes::SceneInstanceAttributes::cptr
         curSceneInstanceAttributes =
             metadataMediator_->getSceneInstanceAttributesByName(stageFile);
@@ -325,11 +325,11 @@ void PhysicsTest::testCollisionBoundingBox() {
         // object is being pushed, so should be moving
         CORRADE_COMPARE_AS(position, prevPosition,
                            Cr::TestSuite::Compare::NotEqual);
-        Magnum::Rad q_angle =
-            Magnum::Math::angle(orientation, Magnum::Quaternion({0, 0, 0}, 1));
+        Magnum::Rad q_halfAngle = Magnum::Math::halfAngle(
+            orientation, Magnum::Quaternion({0, 0, 0}, 1));
         if (i == 1) {
           // bounding box for collision, so the sphere should not be rolling
-          CORRADE_COMPARE_AS(q_angle, Magnum::Rad{0.1},
+          CORRADE_COMPARE_AS(q_halfAngle, Magnum::Rad{0.1},
                              Cr::TestSuite::Compare::LessOrEqual);
         } else {
           // no bounding box, so the sphere should be rolling
@@ -910,7 +910,7 @@ void PhysicsTest::testVelocityControl() {
       (objectWrapper->getTranslation() - posGroundTruth).length(), errorEps,
       Cr::TestSuite::Compare::LessOrEqual);
   Magnum::Rad angleError =
-      Magnum::Math::angle(objectWrapper->getRotation(), qGroundTruth);
+      Magnum::Math::halfAngle(objectWrapper->getRotation(), qGroundTruth);
 
   CORRADE_COMPARE_AS(float(angleError), errorEps,
                      Cr::TestSuite::Compare::LessOrEqual);
@@ -936,8 +936,8 @@ void PhysicsTest::testVelocityControl() {
         (objectWrapper->getTranslation() - kinematicResult.translation)
             .length(),
         errorEps, Cr::TestSuite::Compare::LessOrEqual);
-    angleError = Magnum::Math::angle(objectWrapper->getRotation(),
-                                     kinematicResult.rotation);
+    angleError = Magnum::Math::halfAngle(objectWrapper->getRotation(),
+                                         kinematicResult.rotation);
     CORRADE_COMPARE_AS(float(angleError), errorEps,
                        Cr::TestSuite::Compare::LessOrEqual);
 
@@ -979,7 +979,7 @@ void PhysicsTest::testVelocityControl() {
       (objectWrapper->getTranslation() - posLocalGroundTruth).length(),
       errorEps, Cr::TestSuite::Compare::LessOrEqual);
   Magnum::Rad angleErrorLocal =
-      Magnum::Math::angle(objectWrapper->getRotation(), qLocalGroundTruth);
+      Magnum::Math::halfAngle(objectWrapper->getRotation(), qLocalGroundTruth);
 
   CORRADE_COMPARE_AS(float(angleErrorLocal), errorEps,
                      Cr::TestSuite::Compare::LessOrEqual);

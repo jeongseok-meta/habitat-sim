@@ -6,9 +6,9 @@
 #define ESP_CORE_MANAGEDCONTAINERBASE_H_
 
 /** @file
- * @brief Abstract Class @ref esp::core::ManagedContainerBase : type-independent
- * container functionality consumed by @ref esp::core::ManagedContainer to cut
- * down on code bload.
+ * @brief Abstract Class @ref esp::core::managedContainers::ManagedContainerBase
+ * : type-independent container functionality consumed by @ref
+ * esp::core::managedContainers::ManagedContainer to cut down on code bload.
  */
 
 #include <deque>
@@ -381,8 +381,8 @@ class ManagedContainerBase {
       const std::string& name) const;
 
   /**
-   * @brief Get a list of all managed objects of passed type whose origin
-   * handles contain substr, ignoring subStr's case.
+   * @brief Get a list of all managed objects' handles of passed type whose
+   * origin handles contain substr, ignoring subStr's case.
    *
    * This version works on std::unordered_map<int,std::string> maps' values.
    * @param mapOfHandles map containing the desired managed object handles
@@ -400,8 +400,8 @@ class ManagedContainerBase {
       bool sorted) const;
 
   /**
-   * @brief Get a list of all managed objects of passed type whose origin
-   * handles contain substr, ignoring subStr's case.
+   * @brief Get a list of all managed objects' handles of passed type whose
+   * origin handles contain substr, ignoring subStr's case.
    *
    * This version works on std::unordered_map<std::string,
    * std::set<std::string>> maps's keys.

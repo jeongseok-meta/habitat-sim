@@ -827,7 +827,7 @@ class ArticulatedObject : public esp::physics::PhysicsObjectBase {
    * @brief Returns the @ref
    * metadata::attributes::SceneAOInstanceAttributes used to place this
    * Articulated Object initially in the scene.
-   * @return a read-only copy of the scene instance attributes used to place
+   * @return a read-only copy of the @ref metadata::attributes::SceneInstanceAttributes used to place
    * this object in the scene.
    */
   std::shared_ptr<const metadata::attributes::SceneAOInstanceAttributes>
@@ -851,6 +851,18 @@ class ArticulatedObject : public esp::physics::PhysicsObjectBase {
     return PhysicsObjectBase::getCurrentObjectInstanceAttrInternal<
         metadata::attributes::SceneAOInstanceAttributes>();
   }
+
+  /**
+   * @brief Get a copy of the template used to initialize this object.
+   *
+   * @return A copy of the @ref esp::metadata::attributes::ArticulatedObjectAttributes
+   * template used to create this object.
+   */
+  std::shared_ptr<metadata::attributes::ArticulatedObjectAttributes>
+  getInitializationAttributes() const {
+    return PhysicsObjectBase::getInitializationAttributes<
+        metadata::attributes::ArticulatedObjectAttributes>();
+  };
 
  protected:
   /**
