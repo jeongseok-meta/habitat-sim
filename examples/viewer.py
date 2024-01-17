@@ -416,8 +416,8 @@ class HabitatSimInteractiveViewer(Application):
             for sensor_uuid, sensor in sensor_suite.items():
                 transform = sensor._sensor_object.node.absolute_transformation()
                 self.replay_renderer.set_sensor_transform(i, sensor_uuid, transform)
-            # Render
-            self.replay_renderer.render(mn.gl.default_framebuffer)
+        # Render
+        self.replay_renderer.render(mn.gl.default_framebuffer)
 
     def move_and_look(self, repetitions: int) -> None:
         """
@@ -1113,10 +1113,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--dataset",
-        default="./data/objects/ycb/ycb.scene_dataset_config.json",
+        default="default",
         type=str,
         metavar="DATASET",
-        help='dataset configuration file to use (default: "./data/objects/ycb/ycb.scene_dataset_config.json")',
+        help='dataset configuration file to use (default: "default")',
     )
     parser.add_argument(
         "--disable-physics",
